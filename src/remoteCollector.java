@@ -29,33 +29,33 @@ import java.util.Map;
  */  
 public class remoteCollector 
 {  
-	/**
-     * @FieldName: 
-     * @Description: 
+    /**
+     * @FieldName: CPU_MEM_SHELL.
+     * @Description: the command which is used to fetch CPU & Memory information.
      */
     private static final String CPU_MEM_SHELL = "top -b -n 1";  
     
-	/**
-     * @FieldName: 
-     * @Description: 
+    /**
+     * @FieldName: FILES_SHELL.
+     * @Description: the command which is used to fetch disk information.
      */
     private static final String FILES_SHELL = "df -hl"; 
     
-	/**
-     * @FieldName: 
-     * @Description: 
+    /**
+     * @FieldName: COMMANDS.
+     * @Description: the command array to execute via ssh.
      */
     private static final String[] COMMANDS = {CPU_MEM_SHELL, FILES_SHELL};  
     
-	/**
-     * @FieldName: 
-     * @Description: 
+    /**
+     * @FieldName: LINE_SEPARATOR.
+     * @Description: line separator which is used to separate lines.
      */
     private static final String LINE_SEPARATOR = System.getProperty("line.separator");
     
-	/**
-     * @FieldName: 
-     * @Description: 
+    /**
+     * @FieldName: session.
+     * @Description: the work session of jsch.
      */
     private static Session session;  
   
