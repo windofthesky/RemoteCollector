@@ -3,7 +3,7 @@
  * @Project: AutoMonitorTool.
  * @Package: remotecollector.
  * @Description: The basic java client to collect remote server hardware information via SSH connection.
- * @Author: Yonggang.Yang 
+ * @Author: Hades.Yang 
  * @Version: V1.0
  * @Date: 2015-08-28
  * @History: 
@@ -29,35 +29,56 @@ import java.util.Map;
  */  
 public class remoteCollector 
 {  
-    /**
+	/**
      * @FieldName: CPU_MEM_SHELL.
      * @Description: the command which is used to fetch CPU & Memory information.
      */
     private static final String CPU_MEM_SHELL = "top -b -n 1";  
     
-    /**
+	/**
      * @FieldName: FILES_SHELL.
      * @Description: the command which is used to fetch disk information.
      */
     private static final String FILES_SHELL = "df -hl"; 
     
-    /**
+	/**
      * @FieldName: COMMANDS.
      * @Description: the command array to execute via ssh.
      */
     private static final String[] COMMANDS = {CPU_MEM_SHELL, FILES_SHELL};  
     
-    /**
+	/**
      * @FieldName: LINE_SEPARATOR.
      * @Description: line separator which is used to separate lines.
      */
     private static final String LINE_SEPARATOR = System.getProperty("line.separator");
     
-    /**
+	/**
      * @FieldName: session.
      * @Description: the work session of jsch.
      */
     private static Session session;  
+    
+	/**
+     * @FieldName: CPU_Load.
+     * @Description: the string which is used to record cpu load.
+     *               (Format:CPU_User_Usage:0.1%)
+     */
+    public String CPU_Load;
+    
+	/**
+     * @FieldName: Mem_Usage.
+     * @Description: the string which is used to record memory usage.
+     *               (Format:Memory_Usage:3924688KTotal.1690092KUsed.2234596KFree.181212KBuffers.)
+     */
+    public String Mem_Usage;
+    
+	/**
+     * @FieldName: Disk_Status.
+     * @Description: the string which is used to record disk status.
+     *               (Format:Disk_Status:53GTotal.50GUsed.3GFree)
+     */
+    public String Disk_Status;
   
     /** 
      * @Title: connectRemoteHost.
@@ -68,7 +89,7 @@ public class remoteCollector
      * @return boolean value,which shows connected or not. 
      * @throws JSchException JSchException 
      */  
-    private static boolean connectRemoteHost(String user, String passwd, String host) 
+    private boolean connectRemoteHost(String user, String passwd, String host) 
     {  
         JSch jsch = new JSch();  
         
@@ -103,7 +124,7 @@ public class remoteCollector
      * @Param: host,String type,the ip address of the remote server.
      * @return The result of the command return. 
      */
-    private static Map<String, String> runRemoteShell(String[] commands, String user, String passwd, String host) 
+    private Map<String, String> runRemoteShell(String[] commands, String user, String passwd, String host) 
     {  
         if (!connectRemoteHost(user, passwd, host)) 
         {  
@@ -179,7 +200,7 @@ public class remoteCollector
      * @Param: commands,String[],which store the command to execute.
      * @return The result of the command return. 
      */
-    public static Map<String, String> runLocalShell(String[] commands) 
+    public Map<String, String> runLocalShell(String[] commands) 
     {  
         Runtime runtime = Runtime.getRuntime();  
   
@@ -227,7 +248,7 @@ public class remoteCollector
      * @Param: result,map of the command & command execute result.
      * @return The useful information of the command result.
      */
-    private static String disposeResultMessage(Map<String, String> result) 
+    private String disposeResultMessage(Map<String, String> result) 
     {  
   
         StringBuilder buffer = new StringBuilder();  
@@ -261,7 +282,7 @@ public class remoteCollector
                         }  
                         buffer.append(cpuStr).append(LINE_SEPARATOR);  
   
-                         
+                        this.CPU_Load = cpuStr; 
                     } 
                     else if (line.startsWith("MEM")) //Deal with Mem:  66100704k total, 65323404k used,   777300k free,    89940k buffers 
                     {  
@@ -285,7 +306,8 @@ public class remoteCollector
                             continue;  
                         }  
                         buffer.append(memStr).append(LINE_SEPARATOR);  
-  
+                        
+                        this.Mem_Usage = memStr;
                     }  
                 }  
             } 
@@ -323,9 +345,10 @@ public class remoteCollector
      * @Param: result,map of the command & command execute result.
      * @return The useful information of the command result.
      */
-    private static String disposeFilesSystem(String commandResult) 
+    private String disposeFilesSystem(String commandResult) 
     {  
         String[] strings = commandResult.split(LINE_SEPARATOR);  
+        String diskStr = null;
   
         // final String PATTERN_TEMPLATE = "([a-zA-Z0-9%_/]*)\\s";  
         int size = 0;  
@@ -360,8 +383,12 @@ public class remoteCollector
                 }  
             }  
         }  
-        return new StringBuilder().append(size).append("G Total. ").append(used).append("G  Used. ").append(size - used).append("G  Free \n")  
-                .toString().replace(" ", "");  
+        
+        diskStr = new StringBuilder().append(size).append("G Total. ").append(used).append("G  Used. ").append(size - used).append("G  Free \n")  
+                  .toString().replace(" ", "");
+        
+        this.Disk_Status = diskStr;
+        return diskStr;  
     }  
   
 
@@ -371,7 +398,7 @@ public class remoteCollector
      * @Param: String which contains the storage size with measurement of "K/KB/M/T".
      * @return The storage size with measurement of 'G'.
      */
-    private static int disposeUnit(String s) 
+    private int disposeUnit(String s) 
     {  
         try 
         {  
@@ -404,12 +431,17 @@ public class remoteCollector
         return 0;  
     }  
   
-    //class test main function.
+    //Class local test main function.
     public static void main(String[] args) 
     {  
-        Map<String, String> result = runRemoteShell(COMMANDS, "root", "sinosun", "192.168.40.74");  
-        System.out.println(disposeResultMessage(result));  
-         
+    	remoteCollector rCollector = new remoteCollector();
+        Map<String, String> result = rCollector.runRemoteShell(COMMANDS, "root", "sinosun", "192.168.40.74");  
+        System.out.println(rCollector.disposeResultMessage(result));  
+        System.out.println("=================================");
+        System.out.println(rCollector.CPU_Load);
+        System.out.println(rCollector.Mem_Usage);
+        System.out.println(rCollector.Disk_Status);
+        //runLocalShell(COMMANDS);  
     }  
 }
   
