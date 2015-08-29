@@ -7,7 +7,7 @@
  * @Version: V1.0
  * @Date: 2015-08-28
  * @History: 
- *    1.2015-01-04 First version of remoteCollector was written.
+ *    1.2015-08-28 First version of remoteCollector was written.
  */
 
 //package name.
