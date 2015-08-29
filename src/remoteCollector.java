@@ -10,11 +10,13 @@
  *    1.2015-01-04 First version of remoteCollector was written.
  */
 
+//package name.
 package remotecollector;
 
-
+//import package of jsch.
 import com.jcraft.jsch.*;  
 
+//import for java utilities.
 import java.io.BufferedReader;  
 import java.io.IOException;  
 import java.io.InputStream;  
@@ -29,54 +31,54 @@ import java.util.Map;
  */  
 public class remoteCollector 
 {  
-	/**
+    /**
      * @FieldName: CPU_MEM_SHELL.
      * @Description: the command which is used to fetch CPU & Memory information.
      */
     private static final String CPU_MEM_SHELL = "top -b -n 1";  
     
-	/**
+    /**
      * @FieldName: FILES_SHELL.
      * @Description: the command which is used to fetch disk information.
      */
     private static final String FILES_SHELL = "df -hl"; 
     
-	/**
+    /**
      * @FieldName: COMMANDS.
      * @Description: the command array to execute via ssh.
      */
     private static final String[] COMMANDS = {CPU_MEM_SHELL, FILES_SHELL};  
     
-	/**
+    /**
      * @FieldName: LINE_SEPARATOR.
      * @Description: line separator which is used to separate lines.
      */
     private static final String LINE_SEPARATOR = System.getProperty("line.separator");
     
-	/**
+    /**
      * @FieldName: session.
      * @Description: the work session of jsch.
      */
     private static Session session;  
     
-	/**
+    /**
      * @FieldName: CPU_Load.
      * @Description: the string which is used to record cpu load.
      *               (Format:CPU_User_Usage:0.1%)
      */
     public String CPU_Load;
     
-	/**
+    /**
      * @FieldName: Mem_Usage.
      * @Description: the string which is used to record memory usage.
-     *               (Format:Memory_Usage:3924688KTotal.1690092KUsed.2234596KFree.181212KBuffers.)
+     *               (Format:Memory_Usage:3924688KTotal 1690092KUsed 2234596KFree 181212KBuffers )
      */
     public String Mem_Usage;
     
-	/**
+    /**
      * @FieldName: Disk_Status.
      * @Description: the string which is used to record disk status.
-     *               (Format:Disk_Status:53GTotal.50GUsed.3GFree)
+     *               (Format:Disk_Status:53GTotal 50GUsed 3GFree)
      */
     public String Disk_Status;
   
@@ -292,11 +294,9 @@ public class remoteCollector
                             memStr += line.split(":")[1]
                             		.replace(" ", "")
                                     .replace("TOTAL", "Total.")  
-                                    .replace("USED", "Used.")  
-                                    .replace("FREE", "Free.")  
-                                    .replace("BUFFERS", "Buffers.")
-                                    .replace(",", "");
-  
+                                    .replace("USED", "Used ")  
+                                    .replace("FREE", "Free ")  
+                                    .replace("BUFFERS", "Buffers");
                         } 
                         catch (Exception e) 
                         {  
@@ -384,8 +384,8 @@ public class remoteCollector
             }  
         }  
         
-        diskStr = new StringBuilder().append(size).append("G Total. ").append(used).append("G  Used. ").append(size - used).append("G  Free \n")  
-                  .toString().replace(" ", "");
+        diskStr = new StringBuilder().append(size).append("GTotal ").append(used).append("GUsed ").append(size - used).append("GFree \n")  
+                  .toString();
         
         this.Disk_Status = diskStr;
         return diskStr;  
@@ -435,7 +435,7 @@ public class remoteCollector
     public static void main(String[] args) 
     {  
     	remoteCollector rCollector = new remoteCollector();
-        Map<String, String> result = rCollector.runRemoteShell(COMMANDS, "root", "sinosun", "192.168.40.74");  
+        Map<String, String> result = rCollector.runRemoteShell(COMMANDS, "root", "pwd", "192.168.40.74");  
         System.out.println(rCollector.disposeResultMessage(result));  
         System.out.println("=================================");
         System.out.println(rCollector.CPU_Load);
