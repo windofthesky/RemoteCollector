@@ -293,7 +293,7 @@ public class remoteCollector
                         {  
                             memStr += line.split(":")[1]
                             		.replace(" ", "")
-                                    .replace("TOTAL", "Total.")  
+                                    .replace("TOTAL", "Total ")  
                                     .replace("USED", "Used ")  
                                     .replace("FREE", "Free ")  
                                     .replace("BUFFERS", "Buffers");
